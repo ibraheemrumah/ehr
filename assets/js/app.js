@@ -414,6 +414,39 @@ $.extend(theme.PluginDatePicker.defaults, {
                 }
             });
 		});
+
+		// Vital Sign Insert update password send form data to the server
+		$('#vital_sign').on("click", function(){
+            var $this = $(this);
+            $this.button('loading');
+            var user_id 	= $('#staff_id').val();
+			var temperature	= $('#temperature').val();
+			var pulse		= $('#pulse').val();
+			var respiration	= $('#respiration').val();
+			var remarks		= $('#remarks').val();
+            
+            $.ajax({
+                url: base_url + 'patient/insert_vital_sign',
+                type: "POST",
+                data: {
+
+					'user_id'      : user_id,
+					'temperature'   : temperature,
+					'pulse'        : pulse,
+					'respiration'  : respiration,
+					'remarks'      : remarks
+					
+				},
+                dataType: 'json',
+                success: function (res) {
+                    if (res.status == "success") {
+                        $.magnificPopup.close();
+                        window.location.reload(false);
+                    }
+                   $this.button('reset');
+                }
+            });
+		});
 		
 		// patient update password send form data to the server
 		$('#patientPassUpdate').on("click", function(){

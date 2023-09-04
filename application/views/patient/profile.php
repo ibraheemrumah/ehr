@@ -10,8 +10,8 @@
 				</div>
 			</div>
 			<div class="col-md-12 col-lg-5 col-xl-5">
-				<h5><?php echo html_escape($patient['name']); ?><?php echo "  | EHR NO: ";?><?php echo html_escape(!empty($patient['guardian']) ? $patient['patient_id'] : 'N/A'); ?></h5>
-                <p><?php echo "Surname: ";?><?php echo html_escape(!empty($patient['guardian']) ? $patient['sname'] : 'N/A'); ?></p>
+				<h5><?php echo html_escape($patient['name']); ?></h5>
+                <p><?php echo "EHR NO: ";?><?php echo html_escape(!empty($patient['guardian']) ? $patient['patient_id'] : 'N/A'); ?></p>
                
 				<p><?php echo "Patient / " . html_escape($patient['category_name']); ?></p>
 				<ul>
@@ -29,14 +29,18 @@
 	<div class="col-md-12">
 		<div class="panel-group" id="accordion">
 			<div class="panel panel-accordion">
-				<div class="panel-heading">
-					<h4 class="panel-title">
-                        
-						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#profile">
-							<i class="fas fa-user-edit"></i> <?php echo translate('profile'); ?>
-						</a>
-					</h4>
-				</div>
+            <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <div class="auth-pan">
+                            <button class="btn btn-default btn-circle" id="authentication_btn">
+                            <i class="fas fa-sign"></i> <?php echo translate('vital_sign'); ?>
+                            </button>
+                        </div>
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#profile">
+                            <i class="fas fa-user-edit"></i> <?php echo translate('profile'); ?>
+                        </a>
+                    </h4>
+                </div>
 				<div id="profile" class="accordion-body collapse <?php echo ($this->session->flashdata('profile_tab') ? 'in' : ''); ?>">
                     <?php echo form_open_multipart($this->uri->uri_string()); ?>
                     <input type="hidden" name="patient_id" value="<?php echo html_escape($patient['id']); ?>" id="patient_id">
@@ -240,6 +244,67 @@
 				    <?php echo form_close(); ?>
 				</div>
 			</div>
+            <!---vital sign--->
+            <div class="panel panel-accordion">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#vital_sign_more">
+                        <i class="fas fa-diagnoses"></i> <?php echo translate('Vital Sign Monitoring') . " " . translate('chart'); ?>
+                        </a>
+                    </h4>
+                </div>
+                <div id="vital_sign_more" class="accordion-body collapse <?php echo ($this->session->flashdata('vital_sign_more') == 1 ? 'in' : ''); ?>">
+                    <div class="panel-body">
+                       
+                        <div class="table-responsive mb-md">
+                            <table class="table table-bordered table-hover table-condensed mb-none">
+                            <thead>
+                                <tr>
+                                    <th><?php echo translate('sl'); ?></th>
+                                    <th><?php echo translate('created_at'); ?></th>
+                                    <th><?php echo translate('Temperation'); ?></th>
+                                    <th><?php echo translate('pulse'); ?></th>
+                                    <th><?php echo translate('respiration'); ?></th>
+                                    <th><?php echo translate('remarks'); ?></th>
+                                    
+                                    <th><?php echo translate('actions'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $count = 1;
+                                $this->db->where('user_id', $patient['id']);
+                                $vital_sign = $this->db->get('vital_sign')->result();
+                                if (count($vital_sign)) {
+                                    foreach($vital_sign as $row):
+                                ?>
+                                <tr>
+                                    <td><?php echo $count++?></td>
+                                    <td><?php echo html_escape(_d($row->created_at)); ?></td>
+                                    <td><?php echo html_escape($row->temperature); ?></td>
+                                    <td><?php echo html_escape($row->pulse); ?></td>
+                                    <td><?php echo html_escape($row->respiration); ?></td>
+                                    <td><?php echo html_escape($row->remarks); ?></td>
+                                   
+                                   
+                                    <td class="min-w-c">
+                                        
+                                        <?php echo btn_delete('patient/vital_sign_delete/' . $row->id); ?>
+                                    </td>
+                                </tr>
+                                <?php
+                                    endforeach;
+                                }else{
+                                    echo '<tr> <td colspan="7"> <h5 class="text-danger text-center">' . translate('no_information_available') . '</h5> </td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end vital sign section-->
 <?php if (get_permission('lab_test_bill', 'is_view')) { ?>
             <div class="panel panel-accordion">
                 <div class="panel-heading">
@@ -285,7 +350,7 @@
                                     }
                                     }else {
                                         if ($row['bill_type'] == 2){
-                                            echo "<span class='label label-success-custom'>" . translate('drug') . "</span>";
+                                            echo "<span class='label label-success-custom'>" . translate('Treatment') . "</span>";
 
                                         }
                                     } 
@@ -336,7 +401,7 @@
                                        
 
                                         if ($row['bill_type'] == 2){?>
-                                            <a href="<?php echo base_url('billing/drug_bill_invoice/' . html_escape($row['id']) . "/" . html_escape($row['hash'])); ?>" class="btn btn-circle btn-default"> <i class="fas fa-eye"></i>
+                                            <a href="<?php echo base_url('billing/treatment_bill_invoice/' . html_escape($row['id']) . "/" . html_escape($row['hash'])); ?>" class="btn btn-circle btn-default"> <i class="fas fa-eye"></i>
                                             <?php echo translate('invoice'); ?>
                                             </a>
                                             <?php if (get_permission('lab_test_bill', 'is_delete')): ?>
@@ -369,7 +434,7 @@
                 <div class="panel-heading">
                     <h4 class="panel-title">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#documents_details">
-                            <i class="fas fa-folder-open"></i> <?php echo translate('document') . " " . translate('details'); ?>
+                        <i class="fas fa-file-medical-alt"></i> <?php echo translate('examination') . " " . translate('details'); ?>
                         </a>
                     </h4>
                 </div>
@@ -377,7 +442,7 @@
                     <div class="panel-body">
                         <div class="text-right mb-sm">
                             <a href="javascript:void(0);" id="addStaffDocuments" class="btn btn-circle btn-default mb-sm">
-                                <i class="fas fa-plus-circle"></i> <?php echo translate('add') . " " . translate('document'); ?>
+                                <i class="fas fa-plus-circle"></i> <?php echo translate('add') . " " . translate('examination'); ?>
                             </a>
                         </div>
                         <div class="table-responsive mb-md">
@@ -386,8 +451,8 @@
                                 <tr>
                                     <th><?php echo translate('sl'); ?></th>
                                     <th><?php echo translate('title'); ?></th>
-                                    <th><?php echo translate('document') . " " . translate('type'); ?></th>
-                                    <th><?php echo translate('file'); ?></th>
+                                    <th><?php echo translate('examination') . " " . translate('section'); ?></th>
+                                   
                                     <th><?php echo translate('remarks'); ?></th>
                                     <th><?php echo translate('created_at'); ?></th>
                                     <th><?php echo translate('actions'); ?></th>
@@ -405,7 +470,7 @@
                                     <td><?php echo $count++?></td>
                                     <td><?php echo html_escape($row->title); ?></td>
                                     <td><?php echo html_escape($row->type); ?></td>
-                                    <td><?php echo html_escape($row->file_name); ?></td>
+                                    
                                     <td><?php echo html_escape($row->remarks); ?></td>
                                     <td><?php echo html_escape(_d($row->created_at)); ?></td>
                                     <td class="min-w-c">
@@ -436,7 +501,7 @@
                 <div class="panel-heading">
                     <h4 class="panel-title">
                         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#investigation_details">
-                            <i class="fas fa-folder-open"></i> <?php echo translate('Investigation') . " " . translate('details'); ?>
+                        <i class="fas fa-file-medical"></i> <?php echo translate('Investigation') . " " . translate('details'); ?>
                         </a>
                     </h4>
                 </div>
@@ -471,10 +536,10 @@
 					<td><?php echo _d($row['reporting_date']) . " - " . date("h:i A", strtotime($row['reporting_date'])); ?></td>
 					<td>
 						<?php if (get_permission('patient', 'is_edit')): ?>
-							<a href="<?php echo base_url('test/investigation_edit/' . $row['id']); ?>" class="btn btn-default btn-circle icon" data-toggle="tooltip"
+							<!---<a href="<?php echo base_url('test/investigation_edit/' . $row['id']); ?>" class="btn btn-default btn-circle icon" data-toggle="tooltip"
 							data-original-title="<?php echo translate('edit'); ?>">
 								<i class="fas fa-pen-nib"></i>
-							</a>
+							</a>---->
 						<?php endif;?>
 						<a href="<?php echo base_url('test/investigation_print/'.$row['id']); ?>" class="btn btn-circle icon btn-default" data-toggle="tooltip"
 						data-original-title="<?php echo translate('view'); ?>">
@@ -501,7 +566,7 @@
 <div id="add_documents_modal" class="zoom-anim-dialog modal-block modal-block-primary mfp-hide">
     <section class="panel">
         <div class="panel-heading">
-            <h4 class="panel-title"><i class="fas fa-plus-circle"></i> <?php echo translate('add') . " " . translate('document'); ?></h4>
+            <h4 class="panel-title"><i class="fas fa-plus-circle"></i> <?php echo translate('add') . " " . translate('physical_examination'); ?></h4>
         </div>
         <?php echo form_open_multipart(base_url('patient/document_create'), array('class' => 'form-horizontal', 'id' => 'patientDocAdd')); ?>
             <div class="panel-body">
@@ -514,7 +579,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-3 control-label"><?php echo translate('document') . " " . translate('type'); ?> <span class="required">*</span></label>
+                    <label class="col-md-3 control-label"><?php echo translate('Examination') . " " . translate('type'); ?> <span class="required">*</span></label>
                     <div class="col-md-9">
                         <input type="text" class="form-control" name="document_category" id="adocument_category" value="" />
                         <span class="error"></span>
@@ -528,7 +593,7 @@
                     </div>
                 </div>
                 <div class="form-group mb-md">
-                    <label class="col-md-3 control-label"><?php echo translate('remarks'); ?></label>
+                    <label class="col-md-3 control-label"><?php echo translate('remarks_on_history_and_physical_examination'); ?></label>
                     <div class="col-md-9">
                         <textarea class="form-control valid" rows="2" name="remarks"></textarea>
                     </div>
@@ -599,3 +664,70 @@
     </section>
 </div>
 
+<!-- Login Authentication And Account Inactive Modal -->
+<div id="authentication_modal" class="zoom-anim-dialog modal-block modal-block-primary mfp-hide">
+    <section class="panel">
+        <header class="panel-heading">
+            <h4 class="panel-title">
+            <i class="fas fa-sign"></i> <?php echo translate('vital_sign'); ?>
+            </h4>
+        </header>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="temperature" class="control-label"><?php echo translate('temperature'); ?> <span class="required">*</span></label>
+                <div class="input-group">
+                    <input type="number" class="form-control " name="temperature" id="temperature" />
+                    <span class="input-group-addon">
+                    <i class="fa fa-thermometer"></i>
+                    </span>
+                 </div>
+                <span class="control-label" id="password-msg"></span>
+            </div>
+            <div class="form-group">
+                <label for="pulse" class="control-label"><?php echo translate('pulse'); ?> <span class="required">*</span></label>
+                <div class="input-group">
+                <input type="number" class="form-control " name="pulse" id="pulse" />
+                    <span class="input-group-addon">
+                    <i class="fa fa-stethoscope"></i>
+                    </span>
+                 </div>
+                <span class="control-label" id="password-msg"></span>
+            </div>
+            <div class="form-group">
+                <label for="respiration" class="control-label"><?php echo translate('respiration'); ?> <span class="required">*</span></label>
+                <div class="input-group">
+                <input type="number" class="form-control " name="respiration" id="respiration" />
+                    <span class="input-group-addon">
+                    <i class="fa fa-lungs"></i>
+                    </span>
+                 </div>
+                <span class="control-label" id="password-msg"></span>
+            </div>
+            <div class="form-group">
+                <label for="Remark" class="control-label"><?php echo translate('Remark'); ?> <span class="required">*</span></label>
+                <div class="text-group">
+               
+                 <textarea class="form-control valid" rows="2" name="remarks" id="remarks"></textarea>
+                </div>
+                
+                <span class="control-label" id="password-msg"></span>
+            </div>
+        </div>
+        <footer class="panel-footer">
+            <div class="text-right">
+                <button class="btn btn-default mr-xs" id="vital_sign" data-loading-text="<i class='fas fa-spinner fa-spin'></i> Processing"><?php echo translate('Add_signs'); ?></button>
+                <button class="btn btn-default modal-dismiss"><?php echo translate('close'); ?></button>
+            </div>
+        </footer>
+    </section>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // user authentication modal show
+        $('#authentication_btn').on('click', function() {
+           
+            mfp_modal('#authentication_modal');
+        });
+    });
+</script>

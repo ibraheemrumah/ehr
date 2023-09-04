@@ -328,9 +328,9 @@ input[type="number"] {
 	padding: 30px 0;
 	border-radius: 8px;
 	position: relative;
-	background-image: url(../images/profile_bg.jpg);
+	background-image: url(../images/profile_bg.png);
 	background-repeat: no-repeat;
-	background-position: center;
+
 	background-size: cover;
 	overflow: hidden;
 	color: #fff;

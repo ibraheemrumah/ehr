@@ -168,8 +168,10 @@ class Patient extends Admin_Controller
                 echo json_encode(array('status' => 'fail', 'error' => $array_error));
             }
         }
-    }
+    } 
 
+    
+    
     // patient document details are update here / ajax
     public function document_update()
     {
@@ -217,6 +219,8 @@ class Patient extends Admin_Controller
         }
     }
 
+    // patient vital details are delete here
+
     // patient document details are delete here
     public function document_delete($id)
     {
@@ -242,29 +246,26 @@ class Patient extends Admin_Controller
     }
 
     // patient login password change here by admin
-    public function change_password()
+    public function insert_vital_sign()
     {
-        if (!get_permission('patient', 'is_edit')) {
-            access_denied();
-        }
+        
         $user_id = $this->input->post('user_id');
-        $password = $this->input->post('password');
-        $authentication = $this->input->post('authentication');
+        $temperature = $this->input->post('temperature');
+        $pulse = $this->input->post('pulse');
+        $respiration = $this->input->post('respiration');
+        $remarks = $this->input->post('remarks');
         $response['status'] = 'success';
-        if (empty($authentication)) {
-            if (empty($password) || strlen($password) < 4) {
-                $response['status'] = 'fail';
-                $response['msg'] = (empty($password) ? "The Password field is required." : "The Password field must be at least 4 characters in length");
-            } else {
-                $this->db->where('user_id', $user_id);
-                $this->db->where('role', 7);
-                $this->db->update('login_credential', array('password' => $this->app_lib->pass_hashed($password)));
-            }
-        } else {
-            $this->db->where('user_id', $user_id);
-            $this->db->where('role', 7);
-            $this->db->update('login_credential', array('active' => 0));
-        }
+
+        $vital_sign_data = array(
+            'user_id'       => 1,
+            'temperature'    => $temperature,
+            'pulse'         => $pulse,
+            'respiration'   => $respiration,
+            'remarks'       => $remarks,
+        );
+        $this->db->insert('vital_sign', $vital_sign_data);
+
+
         if ($response['status'] == 'success') {
             set_alert('success', translate('information_has_been_updated_successfully'));
         }
@@ -272,37 +273,15 @@ class Patient extends Admin_Controller
         echo json_encode($response);
     }
 
-    // showing disable authentication patient list
-    public function disable_authentication()
+    public function vital_sign_delete($id)
     {
-        if (!get_permission('patient_disable_authentication', 'is_view')) {
-            access_denied();
-        }
-        if (isset($_POST['auth'])) {
-            if (!get_permission('patient_disable_authentication', 'is_edit')) {
-                access_denied();
-            }
+        if (get_permission('patient', 'is_edit')) {
 
-            $patientlist = $this->input->post('views_bulk_operations');
-            if (isset($patientlist)) {
-                foreach ($patientlist as $id) {
-                    $this->db->where('user_id', $id);
-                    $this->db->where('role', 7);
-                    $this->db->update('login_credential', array('active' => 1));
-                }
-                set_alert('success', translate('information_has_been_updated_successfully'));
-                redirect(base_url('patient/disable_authentication'));
-            } else {
-                set_alert('error', 'Please select at least one item');
-            }
+            $this->db->where('id', $id);
+            $this->db->delete('vital_sign');
+            $this->session->set_flashdata('vital_sign', 1);
         }
-        $this->data['patientlist'] = $this->patient_model->get_patient_list(0);
-        $this->data['title'] = translate('patient') . " " . translate('details');
-        $this->data['sub_page'] = 'patient/disable_authentication';
-        $this->data['main_menu'] = 'patient';
-        $this->load->view('layout/index', $this->data);
     }
-
     // add new patient category
     public function category()
     {

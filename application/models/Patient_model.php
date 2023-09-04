@@ -37,7 +37,7 @@ class Patient_model extends MY_Model
 
         
         if (!isset($data['patient_id'])) {
-            $inser_data1['patient_id'] = substr(app_generate_hash(), 3, 7);
+            $inser_data1['patient_id'] = mt_rand(0,99999999);
             // SAVE EMPLOYEE INFORMATION IN THE DATABASE
             $this->db->insert('patient', $inser_data1);
             $patient_id = $this->db->insert_id();
@@ -90,7 +90,7 @@ class Patient_model extends MY_Model
     {
         $this->db->select('patient.*,patient_category.name as category_name,login_credential.active as active');
         $this->db->from('patient');
-        $this->db->join('login_credential', 'login_credential.user_id = patient.id and login_credential.role = "7"', 'inner');
+        $this->db->join('login_credential', 'login_credential.user_id = patient.id ', 'inner');
         $this->db->join('patient_category', 'patient_category.id = patient.category_id', 'left');
         $this->db->where('login_credential.active', 1);
         $this->db->like('patient.patient_id', $text);

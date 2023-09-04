@@ -44,6 +44,7 @@ class Test_model extends MY_Model
         $this->db->select('labtest_report.*,labtest_bill.id as billid,labtest_bill.bill_no,labtest_bill.date as bill_date,patient.name as patient_name');
         $this->db->from('labtest_report');
         $this->db->join('labtest_bill', 'labtest_bill.id = labtest_report.labtest_bill_id', 'inner');
+        $this->db->where('labtest_bill.bill_type',1);
         $this->db->join('patient', 'patient.id = labtest_bill.patient_id', 'left');
        
         $this->db->where('patient.id',$id);
@@ -82,6 +83,8 @@ class Test_model extends MY_Model
         $this->db->select('labtest_report.*,labtest_bill.id as billid,labtest_bill.bill_no,labtest_bill.due,labtest_bill.date as bill_date,patient.name as patient_name');
         $this->db->from('labtest_report');
         $this->db->join('labtest_bill', 'labtest_bill.id = labtest_report.labtest_bill_id', 'inner');
+        $this->db->where('labtest_bill.bill_type', 1);
+
         $this->db->join('patient', 'patient.id = labtest_bill.patient_id', 'left');
         if ($report == true) {
             $this->db->where('labtest_report.status', 2);

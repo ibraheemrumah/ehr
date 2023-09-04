@@ -528,7 +528,7 @@
                         <?php } if(get_permission('lab_test_bill', 'is_view')) { ?>
                             <li class="<?php if ($sub_page == 'billing/treatment_bill_list' || $sub_page == 'billing/drug_bill_invoice') echo 'nav-active'; ?>">
                                  <a href="<?php echo base_url('billing/treatment_bill_list'); ?>">
-                                    <i class="fas fa-caret-right"></i><span><?php echo translate('Drug') . " " . translate('bill') . " " . translate('list'); ?></span>
+                                    <i class="fas fa-caret-right"></i><span><?php echo translate('Treatment') . " " . translate('bill') . " " . translate('list'); ?></span>
                                  </a>
                             </li>
                         <?php } ?>
